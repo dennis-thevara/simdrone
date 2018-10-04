@@ -2,4 +2,4 @@
 ROS Packages for the simulation of an ARDrone in Gazebo
 
 ROS Version: Kinetic Kame
-Gazebo version: 8.0
+Gazebo version: 7.0
