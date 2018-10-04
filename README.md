@@ -15,8 +15,18 @@ These packages are built on top of the tum_simulator package that was ported to 
 
    mkdir -p catkin_ws/src && cd catkin_ws/src && catkin_init_workspace
    ```
+2. Install dependencies
+   
+   * Hector Suite:
+   ```bash
+   sudo apt-get install ros-kinetic-hector-*
+   ```
+   * Ardrone Autonomy:
+   ```bash
+   sudo apt-get install ros-kinetic-ardrone-autonomy
+   ```
 
-2. Clone this repository and catkin_make
+3. Clone this repository and catkin_make
 
    ```bash
    git clone https://github.com/dionysius07/simdrone.git
@@ -26,7 +36,7 @@ These packages are built on top of the tum_simulator package that was ported to 
    catkin_make
    ```
 
-3. Source the workspace setup.bash
+4. Source the workspace setup.bash
    
    ```bash
    source devel/setup.bash
@@ -71,5 +81,26 @@ Add in the same additional lines:
 ```
 Now return to your workspace and run catkin_make again, and the error should not reappear.
 
+## Launch
 
+1. Launch your Gazebo world:
+   
+   ```bash
+   roslaunch cvg_sim_gazebo ardrone_testworld.launch
+   ```
 
+2. Launch the joystick teleop:
+   
+   ```bash
+   roslaunch simdrone_control simdrone_teleop.launch
+   ```
+   NOTE: Currently supports only XBox 360 controllers
+
+   Control | Function
+   --- | ---
+   X | Takeoff
+   Y | Land
+   Left Analog stick | Yaw (Rot Z)
+   Right Analog stick | Linear movement in X and Y
+   L1 | Decrease altitude
+   R1 | Increase altitude
