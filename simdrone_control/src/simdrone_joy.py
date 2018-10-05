@@ -2,101 +2,103 @@
 
 import rospy
 from sensor_msgs.msg import Joy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import twist
 from std_msgs.msg import Empty
 from sys import exit
 
-# Setup Publishers:
-takeoff_pub = rospy.Publisher("ardrone/takeoff", Empty, queue_size=1)
-land_pub = rospy.Publisher("ardrone/land", Empty, queue_size=1)
-reset_pub = rospy.Publisher("ardrone/reset", Empty, queue_size=1)
-joypub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
+class SimdroneJoynode(object):
 
-# Create twist and empty data variables:
-twist = Twist()
-empty = Empty()
+    def __init__(self):
+        # Setup Publishers:
+        self.takeoff_pub = rospy.Publisher("ardrone/takeoff", Empty, queue_size=1)
+        self.land_pub = rospy.Publisher("ardrone/land", Empty, queue_size=1)
+        self.reset_pub = rospy.Publisher("ardrone/reset", Empty, queue_size=1)
+        self.joypub = rospy.Publisher("cmd_vel", self.twist, queue_size=1)
 
-def simdrone_joynode():
-    # Initialize ROS Node:
-    rospy.init_node("simdrone_joynode", anonymous=True)
+        # Create self.twist and empty Joy variables:
+        self.twist = twist()
+        self.empty = Empty()
+        
+        # Initialize ROS Node:
+        rospy.init_node("simdrone_joynode", anonymous=True)
 
-    # Subscribe to joystick messages:
-    rospy.Subscriber("joy", Joy, joypub_callback, queue_size=1)
+        # Subscribe to joystick messages:
+        self.sub = rospy.Subscriber("joy", self.Joy, joypub_callback, queue_size=1)
 
-    # Keep node alive until killed:
-    rospy.spin()
+        # Keep node alive until killed:
+        #rospy.spin()
 
-def joypub_callback(data):
+    def joypub_callback(self):
 
-    # Takeoff:
-    if data.buttons[2] == 1:
-        takeoff()
-    # Land:
-    elif data.buttons[3] == 1:
-        land()
-    # Reset:
-    elif data.buttons[7] == 1:
-        reset()
-    # Linear in XY:
-    elif (data.axes[4] != 0 or data.axes[3] != 0):
-        linearxy(data.axes[4],data.axes[3])
-    # Yaw:
-    elif data.axes[0] != 0:
-        yaw(data.axes[0])
-    # Climb:
-    elif data.buttons[5] == 1:
-        elev(1)
-    # Drop:
-    elif data.buttons[4] == 1:
-        elev(-1)
-    # Neutral:
-    else:
-        neutral()
+        # Takeoff:
+        if Joy.buttons[2] == 1:
+            self.takeoff()
+        # Land:
+        elif Joy.buttons[3] == 1:
+            self.land()
+        # Reset:
+        elif Joy.buttons[7] == 1:
+            self.reset()
+        # Linear in XY:
+        elif (Joy.axes[4] != 0 or Joy.axes[3] != 0):
+            self.linearxy()
+        # Yaw:
+        elif Joy.axes[0] != 0:
+            self.yaw()
+        # Climb:
+        elif Joy.buttons[5] == 1:
+            self.elev(1)
+        # Drop:
+        elif Joy.buttons[4] == 1:
+            self.elev(-1)
+        # Neutral:
+        else:
+            self.neutral()
 
+    def takeoff(self):
+        # Send takeoff command:
+        rospy.loginfo("Taking Off!")
+        self.takeoff_pub.publish(empty)
 
-def takeoff():
-    # Send takeoff command:
-    rospy.loginfo("Taking Off!")
-    takeoff_pub.publish(empty)
+    def land(self):
+        # Send land command:
+        rospy.loginfo("Landing!")
+        self.land_pub.publish(empty)
 
-def land():
-    # Send land command:
-    rospy.loginfo("Landing!")
-    land_pub.publish(empty)
+    def reset(self):
+        # Send reset command:
+        rospy.loginfo("Resetting!")
+        self.reset_pub.publish(empty)
 
-def reset():
-    # Send reset command:
-    rospy.loginfo("Resetting!")
-    reset_pub.publish(empty)
+    def linearxy(self):
+        # Linear translation in X:
+        self.twist.linear.x = Joy.axes[4]
+        self.twist.linear.y = Joy.axes[3]
+        self.joypub.publish(self.twist)
 
-def linearxy(linx,liny):
-    # Linear translation in X:
-    twist.linear.x = linx
-    twist.linear.y = liny
-    joypub.publish(twist)
+    def yaw(self):
+        # Angular rotation in Z
+        self.twist.angular.z = Joy.axes[0]
+        self.joypub.publish(self.twist)
 
-def yaw(angz):
-    # Angular rotation in Z
-    twist.angular.z = angz
-    joypub.publish(twist)
+    def elev(self,val):
+        # Linear translation in Z
+        self.twist.linear.z = val
+        self.joypub.publish(self.twist)
 
-def elev(val):
-    # Linear translation in Z
-    twist.linear.z = val
-    joypub.publish(twist)
-
-def neutral():
-    twist.linear.x = 0
-    twist.linear.y = 0
-    twist.linear.z = 0
-    twist.angular.x = 0
-    twist.angular.y = 0
-    twist.angular.z = 0
-    joypub.publish(twist)
+    def neutral(self):
+        self.twist.linear.x = 0
+        self.twist.linear.y = 0
+        self.twist.linear.z = 0
+        self.twist.angular.x = 0
+        self.twist.angular.y = 0
+        self.twist.angular.z = 0
+        self.joypub.publish(self.twist)
 
 if __name__ == "__main__":
     try:
-        simdrone_joynode()
+        SimdroneJoynode()
+        rospy.spin()
     except rospy.ROSInterruptException:
         print "Exiting!"
         exit(0)
