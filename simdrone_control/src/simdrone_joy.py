@@ -15,7 +15,7 @@ class SimdroneJoynode(object):
         self.reset_pub = rospy.Publisher("ardrone/reset", Empty, queue_size=1)
         self.joypub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
 
-        # Create self.twist and empty Joy variables:
+        # Create twist and empty data variables:
         self.twist = Twist()
         self.empty = Empty()
         
@@ -23,33 +23,31 @@ class SimdroneJoynode(object):
         rospy.init_node("simdrone_joynode", anonymous=True)
 
         # Subscribe to joystick messages:
-        self.sub = rospy.Subscriber("joy", self.Joy, joypub_callback, queue_size=1)
+        self.sub = rospy.Subscriber("joy", Joy, self.joypub_callback, queue_size=1)
 
-        # Keep node alive until killed:
-        #rospy.spin()
-
-    def joypub_callback(self):
-
+    def joypub_callback(self,joypose):
+        # Create class variable:
+        self.data = joypose
         # Takeoff:
-        if Joy.buttons[2] == 1:
+        if self.data.buttons[2] == 1:
             self.takeoff()
         # Land:
-        elif Joy.buttons[3] == 1:
+        elif self.data.buttons[3] == 1:
             self.land()
         # Reset:
-        elif Joy.buttons[7] == 1:
+        elif self.data.buttons[7] == 1:
             self.reset()
         # Linear in XY:
-        elif (Joy.axes[4] != 0 or Joy.axes[3] != 0):
+        elif (self.data.axes[4] != 0 or self.data.axes[3] != 0):
             self.linearxy()
         # Yaw:
-        elif Joy.axes[0] != 0:
+        elif self.data.axes[0] != 0:
             self.yaw()
         # Climb:
-        elif Joy.buttons[5] == 1:
+        elif self.data.buttons[5] == 1:
             self.elev(1)
         # Drop:
-        elif Joy.buttons[4] == 1:
+        elif self.data.buttons[4] == 1:
             self.elev(-1)
         # Neutral:
         else:
@@ -58,27 +56,27 @@ class SimdroneJoynode(object):
     def takeoff(self):
         # Send takeoff command:
         rospy.loginfo("Taking Off!")
-        self.takeoff_pub.publish(empty)
+        self.takeoff_pub.publish(self.empty)
 
     def land(self):
         # Send land command:
         rospy.loginfo("Landing!")
-        self.land_pub.publish(empty)
+        self.land_pub.publish(self.empty)
 
     def reset(self):
         # Send reset command:
         rospy.loginfo("Resetting!")
-        self.reset_pub.publish(empty)
+        self.reset_pub.publish(self.empty)
 
     def linearxy(self):
         # Linear translation in X:
-        self.twist.linear.x = Joy.axes[4]
-        self.twist.linear.y = Joy.axes[3]
+        self.twist.linear.x = self.data.axes[4]
+        self.twist.linear.y = self.data.axes[3]
         self.joypub.publish(self.twist)
 
     def yaw(self):
         # Angular rotation in Z
-        self.twist.angular.z = Joy.axes[0]
+        self.twist.angular.z = self.data.axes[0]
         self.joypub.publish(self.twist)
 
     def elev(self,val):
@@ -100,5 +98,4 @@ if __name__ == "__main__":
         SimdroneJoynode()
         rospy.spin()
     except rospy.ROSInterruptException:
-        print "Exiting!"
         exit(0)
