@@ -2,7 +2,7 @@
 
 import rospy
 from sensor_msgs.msg import Joy
-from geometry_msgs.msg import twist
+from geometry_msgs.msg import Twist
 from std_msgs.msg import Empty
 from sys import exit
 
@@ -13,10 +13,10 @@ class SimdroneJoynode(object):
         self.takeoff_pub = rospy.Publisher("ardrone/takeoff", Empty, queue_size=1)
         self.land_pub = rospy.Publisher("ardrone/land", Empty, queue_size=1)
         self.reset_pub = rospy.Publisher("ardrone/reset", Empty, queue_size=1)
-        self.joypub = rospy.Publisher("cmd_vel", self.twist, queue_size=1)
+        self.joypub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
 
         # Create self.twist and empty Joy variables:
-        self.twist = twist()
+        self.twist = Twist()
         self.empty = Empty()
         
         # Initialize ROS Node:
