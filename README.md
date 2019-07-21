@@ -4,7 +4,7 @@ ROS Packages for the simulation of an ARDrone in Gazebo
 * ROS Version: Kinetic Kame
 * Gazebo version: 7.0
 
-These packages are built on top of the tum_simulator package that was ported to Kinetic by @angelsantamaria, available [here](https://github.com/angelsantamaria/tum_simulator).
+These packages are built on top of the tum_simulator package that was ported to Kinetic by [@angelsantamaria](https://github.com/angelsantamaria), available [here](https://github.com/angelsantamaria/tum_simulator).
 
 ## Initialization
 
